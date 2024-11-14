@@ -3,7 +3,7 @@ package userServices
 import (
 	"errors"
 	"go-project/internal/api/model"
-	userRepository "go-project/internal/api/repository"
+	"go-project/internal/api/repository"
 	"go-project/util"
 )
 
