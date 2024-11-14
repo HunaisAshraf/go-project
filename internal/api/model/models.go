@@ -7,3 +7,9 @@ type User struct {
 	Phone    string `json:"phone"`
 	Password string `json:"password"`
 }
+
+type Token struct {
+	Id     string `json:"_id,omitempty"`
+	UserId string `json:"user_id"`
+	Token  string `json:"token"`
+}

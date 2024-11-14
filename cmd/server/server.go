@@ -7,6 +7,7 @@ import (
 	userRepository "go-project/internal/api/repository"
 	"go-project/internal/api/routes"
 	userServices "go-project/internal/api/services"
+	"go-project/util/auth"
 	"log"
 	"log/slog"
 	"net/http"
@@ -32,7 +33,9 @@ func main() {
 
 	repository := userRepository.NewMongoUserRepository(client, os.Getenv("MONGO_DB_NAME"), os.Getenv("MONGO_COLLECTION_NAME"))
 
-	userService := userServices.NewUserService(repository)
+	auth := jwtauth.NewJWTAuth(os.Getenv("ACCESS_TOKEN_SECRET"), os.Getenv("refresh_token_secret"))
+
+	userService := userServices.NewUserService(repository, auth)
 
 	r := routes.Router(userService)
 

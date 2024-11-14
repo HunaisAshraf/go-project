@@ -5,6 +5,7 @@ import (
 	"go-project/internal/api/model"
 	"go-project/internal/api/services"
 	"net/http"
+	"time"
 )
 
 func HandleLogin(service *userServices.UserService) http.HandlerFunc {
@@ -19,13 +20,30 @@ func HandleLogin(service *userServices.UserService) http.HandlerFunc {
 			return
 		}
 
-		user, err := service.LoginUser(ctx, req.Email, req.Password)
+		user, accessToken, refreshToken, err := service.LoginUser(ctx, req.Email, req.Password)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+		res := struct {
+			User        model.User
+			AccessToken string
+		}{
+			User:        user,
+			AccessToken: accessToken,
+		}
 
-		err = json.NewEncoder(w).Encode(user)
+		cookie := &http.Cookie{
+			Name:     "refreshToken",
+			Value:    refreshToken,
+			HttpOnly: true,
+			Secure:   true,
+			MaxAge:   60 * 60 * 24 * 30,
+			Expires:  time.Now().Add(time.Hour * 24 * 30),
+		}
+
+		http.SetCookie(w, cookie)
+		err = json.NewEncoder(w).Encode(res)
 
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -47,14 +65,30 @@ func HandleSignup(service *userServices.UserService) http.HandlerFunc {
 			return
 		}
 
-		newUser, err := service.SignupUser(ctx, req)
+		newUser, accessToken, refreshToken, err := service.SignupUser(ctx, req)
 
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+		res := struct {
+			User        model.User
+			AccessToken string
+		}{
+			User:        newUser,
+			AccessToken: accessToken,
+		}
+		cookie := &http.Cookie{
+			Name:     "refreshToken",
+			Value:    refreshToken,
+			HttpOnly: true,
+			Secure:   true,
+			MaxAge:   60 * 60 * 24 * 30,
+			Expires:  time.Now().Add(time.Hour * 24 * 30),
+		}
 
-		err = json.NewEncoder(w).Encode(newUser)
+		http.SetCookie(w, cookie)
+		err = json.NewEncoder(w).Encode(res)
 
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
