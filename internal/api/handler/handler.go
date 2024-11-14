@@ -7,52 +7,59 @@ import (
 	"net/http"
 )
 
-func HandleLogin(w http.ResponseWriter, r *http.Request) {
+func HandleLogin(service *userServices.UserService) http.HandlerFunc {
 
-	var req model.User
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req model.User
+		ctx := r.Context()
 
-	err := json.NewDecoder(r.Body).Decode(&req)
-	if err != nil {
-		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-		return
-	}
+		err := json.NewDecoder(r.Body).Decode(&req)
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+			return
+		}
 
-	user, err := userServices.LoginUser(req.Email, req.Password)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+		user, err := service.LoginUser(ctx, req.Email, req.Password)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 
-	err = json.NewEncoder(w).Encode(user)
+		err = json.NewEncoder(w).Encode(user)
 
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	}
 }
 
-func HandleSignup(w http.ResponseWriter, r *http.Request) {
-	var req model.User
+func HandleSignup(service *userServices.UserService) http.HandlerFunc {
 
-	err := json.NewDecoder(r.Body).Decode(&req)
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req model.User
 
-	if err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
-		return
+		ctx := r.Context()
+
+		err := json.NewDecoder(r.Body).Decode(&req)
+		if err != nil {
+			http.Error(w, "Invalid request body", http.StatusBadRequest)
+			return
+		}
+
+		newUser, err := service.SignupUser(ctx, req)
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		err = json.NewEncoder(w).Encode(newUser)
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
 	}
-
-	newUser, err := userServices.SignupUser(req)
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	err = json.NewEncoder(w).Encode(newUser)
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
 }

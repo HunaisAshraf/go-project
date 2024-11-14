@@ -1,15 +1,23 @@
 package userServices
 
 import (
+	"context"
 	"errors"
 	"go-project/internal/api/model"
 	"go-project/internal/api/repository"
 	"go-project/util"
 )
 
-func SignupUser(user model.User) (model.User, error) {
+type UserService struct {
+	repo userRepository.UserRepository
+}
 
-	if _, exist := userRepository.GetUser(user.Email); exist {
+func NewUserService(repo userRepository.UserRepository) *UserService {
+	return &UserService{repo: repo}
+}
+
+func (s *UserService) SignupUser(ctx context.Context, user model.User) (model.User, error) {
+	if _, exist := s.repo.GetUser(ctx, user.Email); exist {
 		return model.User{}, errors.New("user already exist ")
 	}
 
@@ -19,7 +27,7 @@ func SignupUser(user model.User) (model.User, error) {
 	}
 
 	user.Password = hashedPassword
-	success := userRepository.CreateNewUser(user)
+	success := s.repo.CreateNewUser(ctx, user)
 	if !success {
 		return model.User{}, errors.New("error in adding user")
 	}
@@ -28,8 +36,8 @@ func SignupUser(user model.User) (model.User, error) {
 	return user, nil
 }
 
-func LoginUser(email string, password string) (model.User, error) {
-	user, exist := userRepository.GetUser(email)
+func (s *UserService) LoginUser(ctx context.Context, email string, password string) (model.User, error) {
+	user, exist := s.repo.GetUser(ctx, email)
 	if !exist {
 		return model.User{}, errors.New("user does not exist")
 	}
