@@ -2,14 +2,15 @@ package jwtauth
 
 import (
 	"fmt"
-	"github.com/golang-jwt/jwt/v5"
 	"time"
+
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type Auth interface {
 	GenerateAccessToken(_id string) (string, error)
 	GenerateRefreshToken(_id string) (string, error)
-	VerifyToken(token string) bool
+	// VerifyToken(next http.Handler) http.HandlerFunc
 }
 
 type JWTAuth struct {
@@ -18,6 +19,7 @@ type JWTAuth struct {
 }
 
 func NewJWTAuth(accessTokenString string, refreshTokenString string) *JWTAuth {
+	fmt.Println(refreshTokenString)
 	return &JWTAuth{accessTokenString: []byte(accessTokenString), refreshTokenString: []byte(refreshTokenString)}
 }
 
@@ -26,9 +28,9 @@ func (j *JWTAuth) GenerateAccessToken(_id string) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"_id": _id,
-		"exp": time.Now().Add(time.Minute * 10).Unix(),
+		"exp": time.Now().Add(time.Minute * 40).Unix(),
 	})
-
+	fmt.Println(j.accessTokenString)
 	tokenString, err := token.SignedString(j.refreshTokenString)
 
 	if err != nil {
@@ -45,14 +47,11 @@ func (j *JWTAuth) GenerateRefreshToken(id string) (string, error) {
 		"exp": time.Now().Add(time.Hour * 24 * 30).Unix(),
 	})
 
+	fmt.Println("sdfsd88888888888888888888888fasdf", j.refreshTokenString)
 	tokenString, err := token.SignedString(j.refreshTokenString)
 
 	if err != nil {
 		return "", err
 	}
 	return tokenString, nil
-}
-
-func (j *JWTAuth) VerifyToken(token string) bool {
-	return true
 }

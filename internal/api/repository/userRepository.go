@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"go-project/internal/api/model"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -15,7 +16,7 @@ type UserRepository interface {
 	CreateNewUser(ctx context.Context, newUser model.User) (model.User, error)
 	GetUser(ctx context.Context, email string) (model.User, bool)
 	AddToken(ctx context.Context, token model.Token) (model.Token, error)
-	GetToken(ctx context.Context, token model.Token) (model.Token, error)
+	GetToken(ctx context.Context, token string) (model.Token, error)
 	UpdateToken(ctx context.Context, token model.Token) bool
 }
 
@@ -65,13 +66,17 @@ func (r *MongoUserRepository) AddToken(ctx context.Context, token model.Token) (
 	return token, nil
 }
 
-func (r *MongoUserRepository) GetToken(ctx context.Context, token model.Token) (model.Token, error) {
+func (r *MongoUserRepository) GetToken(ctx context.Context, token string) (model.Token, error) {
 	filter := bson.M{"token": token}
+	fmt.Println("laskjdfjlsjdf", token)
+	fmt.Println("laskjdfjlsjdfasdfsaf", filter)
 
 	var foundToken model.Token
 
-	err := r.token.FindOne(ctx, filter).Decode(&token)
-
+	err := r.token.FindOne(ctx, filter).Decode(&foundToken)
+	fmt.Println("data", err)
+	//
+	fmt.Println("founded token", foundToken)
 	if err != nil {
 		return foundToken, err
 	}

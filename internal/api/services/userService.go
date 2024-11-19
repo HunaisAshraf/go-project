@@ -3,10 +3,11 @@ package userServices
 import (
 	"context"
 	"errors"
+	"fmt"
 	"go-project/internal/api/model"
-	"go-project/internal/api/repository"
+	userRepository "go-project/internal/api/repository"
 	"go-project/util"
-	"go-project/util/auth"
+	jwtauth "go-project/util/auth"
 )
 
 type UserService struct {
@@ -33,6 +34,7 @@ func (s *UserService) SignupUser(ctx context.Context, user model.User) (model.Us
 	if err != nil {
 		return model.User{}, "", "", errors.New("error in adding user")
 	}
+
 	accessToken, _ := s.auth.GenerateAccessToken(user.Id)
 	refreshToken, _ := s.auth.GenerateRefreshToken(user.Id)
 
@@ -62,6 +64,31 @@ func (s *UserService) LoginUser(ctx context.Context, email string, password stri
 	accessToken, _ := s.auth.GenerateAccessToken(user.Id)
 	refreshToken, _ := s.auth.GenerateRefreshToken(user.Id)
 
+	newToken := model.Token{
+		Token:  refreshToken,
+		UserId: user.Id,
+	}
+	_, err := s.repo.AddToken(ctx, newToken)
+	if err != nil {
+		return model.User{}, "", "", errors.New("error in adding token")
+	}
+
 	user.Password = ""
 	return user, accessToken, refreshToken, nil
+}
+
+func (s *UserService) TokenRefresh(ctx context.Context, token string) (string, error) {
+	tokenFound, err := s.repo.GetToken(ctx, token)
+	if err != nil {
+		fmt.Println(err)
+		return "", err
+	}
+	accessToken, err := s.auth.GenerateAccessToken(tokenFound.UserId)
+	if err != nil {
+		fmt.Println(err)
+		return "", err
+	}
+
+	return accessToken, err
+
 }
