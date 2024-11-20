@@ -68,15 +68,10 @@ func (r *MongoUserRepository) AddToken(ctx context.Context, token model.Token) (
 
 func (r *MongoUserRepository) GetToken(ctx context.Context, token string) (model.Token, error) {
 	filter := bson.M{"token": token}
-	fmt.Println("laskjdfjlsjdf", token)
-	fmt.Println("laskjdfjlsjdfasdfsaf", filter)
 
 	var foundToken model.Token
 
 	err := r.token.FindOne(ctx, filter).Decode(&foundToken)
-	fmt.Println("data", err)
-	//
-	fmt.Println("founded token", foundToken)
 	if err != nil {
 		return foundToken, err
 	}

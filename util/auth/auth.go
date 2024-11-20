@@ -30,8 +30,7 @@ func (j *JWTAuth) GenerateAccessToken(_id string) (string, error) {
 		"_id": _id,
 		"exp": time.Now().Add(time.Minute * 40).Unix(),
 	})
-	fmt.Println(j.accessTokenString)
-	tokenString, err := token.SignedString(j.refreshTokenString)
+	tokenString, err := token.SignedString(j.accessTokenString)
 
 	if err != nil {
 		return "", err
@@ -40,14 +39,12 @@ func (j *JWTAuth) GenerateAccessToken(_id string) (string, error) {
 }
 
 func (j *JWTAuth) GenerateRefreshToken(id string) (string, error) {
-	fmt.Println("generating refresh token")
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"_id": id,
 		"exp": time.Now().Add(time.Hour * 24 * 30).Unix(),
 	})
 
-	fmt.Println("sdfsd88888888888888888888888fasdf", j.refreshTokenString)
 	tokenString, err := token.SignedString(j.refreshTokenString)
 
 	if err != nil {
