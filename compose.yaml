@@ -47,7 +47,7 @@ networks:
   my_network:
     driver: bridge
     # environment:
-    #   MONGO_URI: "mongodb+srv://hunais:110278@cluster0.g96oqsi.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+    #   MONGO_URI: 
     #   MONGO_DB_NAME: "goDB"
     #   MONGO_COLLECTION_NAME: "USERS"
     #   ACCESS_TOKEN_SECRET: "accesstokensecret"
