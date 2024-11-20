@@ -7,26 +7,22 @@ import (
 	"go-project/internal/api/routes"
 	userServices "go-project/internal/api/services"
 	jwtauth "go-project/util/auth"
-	"log"
-	"log/slog"
 	"net/http"
 	"os"
-
-	"github.com/joho/godotenv"
 )
 
-func init() {
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatal("Error loading .env file", err)
-	}
-	slog.Info("env loaded successfully")
-}
+// func init() {
+// 	err := godotenv.Load(".env")
+// 	if err != nil {
+// 		log.Fatal("Error loading .env file", err)
+// 	}
+// 	slog.Info("env loaded successfully")
+// }
 
 //var Client *mongo.Client
 //var UserCollection *mongo.Collection
 
-const SERVER_PORT = "localhost:3000"
+const SERVER_PORT = ":3001"
 
 func main() {
 
